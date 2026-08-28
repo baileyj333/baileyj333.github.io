@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Authorisation code</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+         margin: 0; padding: 24px; line-height: 1.5; }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; }
+  p.sub { margin: 0 0 24px; opacity: .7; font-size: .9rem; }
+  #code { width: 100%; box-sizing: border-box; font-family: ui-monospace, SFMono-Regular,
+          Menlo, monospace; font-size: .9rem; padding: 12px; border-radius: 8px;
+          border: 1px solid rgba(128,128,128,.4); background: rgba(128,128,128,.08);
+          min-height: 120px; word-break: break-all; }
+  button { margin-top: 12px; padding: 12px 20px; font-size: 1rem; border-radius: 8px;
+           border: 0; background: #1a1a1a; color: #fff; cursor: pointer; width: 100%; }
+  @media (prefers-color-scheme: dark) { button { background: #eee; color: #111; } }
+  .err { color: #b00020; font-weight: 600; }
+  .ok { opacity: .7; font-size: .85rem; margin-top: 16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Authorisation code</h1>
+  <p class="sub">Tap Copy, then paste this back into the terminal session.</p>
+  <textarea id="code" readonly></textarea>
+  <button id="copy">Copy</button>
+  <p class="ok" id="note"></p>
+</main>
+<script>
+  var q = new URLSearchParams(window.location.search);
+  var box = document.getElementById('code');
+  var note = document.getElementById('note');
+  if (q.get('error')) {
+    box.value = 'error: ' + q.get('error') + '\n' + (q.get('error_description') || '');
+    note.className = 'err';
+    note.textContent = 'Tesla returned an error instead of a code.';
+  } else if (q.get('code')) {
+    // Hand back the whole query string so the state parameter travels with the code.
+    box.value = window.location.search.replace(/^\?/, '');
+    note.textContent = 'This code is single-use and expires in a few minutes.';
+  } else {
+    box.value = '(no code in the URL - open this page via the Tesla login link, not directly)';
+  }
+  document.getElementById('copy').onclick = function () {
+    box.select();
+    navigator.clipboard.writeText(box.value).then(function () {
+      document.getElementById('copy').textContent = 'Copied';
+    }, function () {
+      document.execCommand('copy');
+      document.getElementById('copy').textContent = 'Copied';
+    });
+  };
+</script>
+</body>
+</html>
